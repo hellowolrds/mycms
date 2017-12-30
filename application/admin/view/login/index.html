@@ -7,7 +7,7 @@
             <div style="height:150px;"></div>
             <div class="media media-y margin-big-bottom">           
             </div>         
-            <form action="index.html" method="post">
+            <form action="{:url('admin/index/index')}" method="post">
             <div class="panel loginbox">
                 <div class="text-center margin-big padding-big-top"><h1>后台管理中心</h1></div>
                 <div class="panel-body" style="padding:30px; padding-bottom:10px; padding-top:10px;">
@@ -26,17 +26,55 @@
                     <div class="form-group">
                         <div class="field">
                             <input type="text" class="input input-big" name="code" placeholder="填写右侧的验证码" data-validate="required:请填写右侧的验证码" />
-                           <img src="images/passcode.jpg" alt="" width="100" height="32" class="passcode" style="height:43px;cursor:pointer;" onclick="this.src=this.src+'?'">  
+                           <img src="{:captcha_src()}" alt="" width="100" class="passcode" style="height:43px;cursor:pointer;" onclick="this.src=this.src+'?'">
                                                    
                         </div>
                     </div>
                 </div>
-                <div style="padding:30px;"><input type="submit" class="button button-block bg-main text-big input-big" value="登录"></div>
+                <div style="padding:30px;"><input type="button" id="btn" class="button button-block bg-main text-big input-big" value="登录"></div>
             </div>
             </form>          
         </div>
     </div>
 </div>
 
+<script>
+    $("#btn").on('click', function (e) {
+        var name = $("input[name=name]").val().trim(),
+            password = $("input[name=password]").val().trim(),
+            code = $("input[name=code]").val().trim();
+//        判断是否为空
+        if ( name === '' || password === '' || code === '' ) {
+            $("form").submit();
+            return false;
+        }
+//        发送ajax请求验证用户
+        $.ajax({
+            url: "{:url('admin/login/check')}",
+            type: 'post',
+            dataTpe: 'json',
+            data: {
+                name: name,
+                password: password,
+                code: code
+            },
+            success: function (data) {
+                var temp = $("input[name=code]").parent();
+                if ( !data.flag ) {
+                    $('.passcode').trigger('click');
+                    $("input[name=code]").closest('.form-group').removeClass('check-success').addClass('check-error');
+                    var checkText = "<li>" + data.msg + "</li>";
+                    temp.children('.input-help').remove();
+                    temp.append('<div class="input-help"><ul>' + checkText + '</ul></div>');
+                    return ;
+                }
+                $("input[name=code]").closest('.form-group').removeClass('check-error').addClass('check-success');
+                temp.children('.input-help').remove();
+                window.location.assign("{:url('/admin/index')}");
+            }
+
+        });
+    });
+</script>
 </body>
 </html>
