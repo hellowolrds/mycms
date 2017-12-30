@@ -4,7 +4,7 @@ use think\Controller;
 use think\Request;
 use think\Captcha;
 use think\Db;
-
+use think\Session;
 class Login extends Controller
 {
     public function index()
@@ -29,6 +29,8 @@ class Login extends Controller
         if ( !$result ) {
             return json(['status'=>200, 'flag'=>false, 'msg'=>'用户名或密码错误']);
         }
+//        保存登录信息
+        session::set('name', $name);
         return json(['status'=>200, 'flag'=>true, 'msg'=>'ok']);
     }
 }
